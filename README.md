@@ -13,9 +13,9 @@ docker compose --profile all up -d
 
 To enable SSL, use `nginx` as a reverse proxy.
 
-1. Link `sunangel-api.conf` to `/etc/ngingx/conf.d/sunangel-api.conf`
+1. Link `sunangel-api.conf` to `/etc/nginx/conf.d/sunangel-api.conf`
 
-`sudo ln -s sunangel-api.conf /etc/ngingx/conf.d/sunangel-api.conf`
+`sudo ln -s sunangel-api.conf /etc/nginx/conf.d/sunangel-api.conf`
 
 2. Reload the config with `sudo nginx -t`
 3. Restart `nginx` with `sudo systemctl restart nginx`
