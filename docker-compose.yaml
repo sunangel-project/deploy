@@ -1,18 +1,25 @@
 services:
   nats:
-    image: nats:latest
+    image: nats:alpine
     ports:
       - "8222:8222"
       - "4222:4222"
     command: "--name main --jetstream --http_port 8222"
     volumes:
       - ~/jetstream-data:/tmp/nats/jetstream
-  
+    healthcheck:
+      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:8222/healthz || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
   api:
     image: ghcr.io/sunangel-project/api:latest
     ports:
       - "6660:6660"
-    depends_on: ["nats"]
+    depends_on:
+      nats:
+        condition: service_healthy
     environment:
       - NATS_HOST=nats
       - RUST_LOG=info
@@ -20,26 +27,46 @@ services:
   
   spot-finder:
     image: ghcr.io/sunangel-project/spot-finder:latest
-    depends_on: ["nats", "api"]
+    depends_on:
+      nats:
+        condition: service_healthy
+      api:
+        condition: service_started
     environment:
       - NATS_HOST=nats
       - RUST_LOG=info
 
   horizon-get:
     image: ghcr.io/sunangel-project/horizon-get:latest
-    depends_on: ["nats", "spot-finder"]
+    depends_on:
+      nats:
+        condition: service_healthy
+      spot-finder:
+        condition: service_started
     environment:
       - NATS_HOST=nats
 
   horizon-compute:
     image: ghcr.io/sunangel-project/horizon-compute:latest
-    depends_on: ["nats", "horizon-get"]
+    depends_on:
+      nats:
+        condition: service_healthy
+      horizon-get:
+        condition: service_started
     environment:
       - NATS_HOST=nats
+    deploy:
+      resources:
+        limits:
+          cpus: '0.8'
   
   sky-service:
     image: ghcr.io/sunangel-project/sky-service:latest
-    depends_on: ["nats", "horizon-compute"]
+    depends_on:
+      nats:
+        condition: service_healthy
+      horizon-compute:
+        condition: service_started
     environment:
       - NATS_HOST=nats
       - RUST_LOG=info

@@ -2,3 +2,5 @@
 *.cer
 *.pem
 *.key
+
+logs.txt
