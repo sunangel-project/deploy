@@ -20,10 +20,8 @@ services:
     depends_on:
       nats:
         condition: service_healthy
-    environment:
-      - NATS_HOST=nats
-      - RUST_LOG=info
-      - FAKE=0
+    volumes:
+      - .env:/.env
   
   spot-finder:
     image: ghcr.io/sunangel-project/spot-finder:latest
@@ -32,9 +30,8 @@ services:
         condition: service_healthy
       api:
         condition: service_started
-    environment:
-      - NATS_HOST=nats
-      - RUST_LOG=info
+    volumes:
+      - .env:/.env
 
   horizon-get:
     image: ghcr.io/sunangel-project/horizon-get:latest
@@ -43,8 +40,8 @@ services:
         condition: service_healthy
       spot-finder:
         condition: service_started
-    environment:
-      - NATS_HOST=nats
+    volumes:
+      - .env:/.env
 
   horizon-compute:
     image: ghcr.io/sunangel-project/horizon-compute:latest
@@ -53,8 +50,8 @@ services:
         condition: service_healthy
       horizon-get:
         condition: service_started
-    environment:
-      - NATS_HOST=nats
+    volumes:
+      - .env:/.env
     deploy:
       resources:
         limits:
@@ -67,6 +64,5 @@ services:
         condition: service_healthy
       horizon-compute:
         condition: service_started
-    environment:
-      - NATS_HOST=nats
-      - RUST_LOG=info
+    volumes:
+      - .env:/.env
