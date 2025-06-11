@@ -8,10 +8,15 @@ services:
     volumes:
       - ~/jetstream-data:/tmp/nats/jetstream
     healthcheck:
-      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:8222/healthz || exit 1"]
+      test:
+        [
+          "CMD-SHELL",
+          "wget --quiet --tries=1 --spider http://localhost:8222/healthz || exit 1",
+        ]
       interval: 10s
       timeout: 5s
       retries: 3
+    restart: unless-stopped
 
   api:
     image: ghcr.io/sunangel-project/api:latest
@@ -22,7 +27,8 @@ services:
         condition: service_healthy
     volumes:
       - .env:/.env
-  
+    restart: unless-stopped
+
   spot-finder:
     image: ghcr.io/sunangel-project/spot-finder:latest
     depends_on:
@@ -32,6 +38,7 @@ services:
         condition: service_started
     volumes:
       - .env:/.env
+    restart: unless-stopped
 
   horizon-get:
     image: ghcr.io/sunangel-project/horizon-get:latest
@@ -42,6 +49,7 @@ services:
         condition: service_started
     volumes:
       - .env:/.env
+    restart: unless-stopped
 
   horizon-compute:
     image: ghcr.io/sunangel-project/horizon-compute:latest
@@ -55,8 +63,9 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.8'
-  
+          cpus: "0.8"
+    restart: unless-stopped
+
   sky-service:
     image: ghcr.io/sunangel-project/sky-service:latest
     depends_on:
@@ -66,3 +75,4 @@ services:
         condition: service_started
     volumes:
       - .env:/.env
+    restart: unless-stopped
